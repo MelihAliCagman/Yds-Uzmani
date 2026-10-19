@@ -4,18 +4,57 @@
 
 Amaç basit: **kelimeyi bir kez gör, yanlış yaptığın şeyi tam unutmak üzereyken tekrar karşına çıkar.** Bunun için bilimsel olarak en iyi sonuç veren aralıklı tekrar algoritmalarından biri olan **FSRS** kullanılıyor.
 
-<p align="center">
-  <img src="docs/screenshots/ana-sayfa.png" width="23%" alt="Ana sayfa" />
-  <img src="docs/screenshots/mufredat.png" width="23%" alt="Müfredat" />
-  <img src="docs/screenshots/kelime-calismasi.png" width="23%" alt="Test öncesi kelime çalışması" />
-  <img src="docs/screenshots/soru-aciklama.png" width="23%" alt="Soru ve açıklama" />
-</p>
-<p align="center">
-  <img src="docs/screenshots/yanlis-defteri.png" width="23%" alt="Yanlış defteri" />
-  <img src="docs/screenshots/setlerim.png" width="23%" alt="Setlerim ve kelime defteri" />
-  <img src="docs/screenshots/deneme-sinavi.png" width="23%" alt="Deneme sınavı kurulumu" />
-  <img src="docs/screenshots/deneme-soru.png" width="23%" alt="Deneme sınavı" />
-</p>
+## Ekran görüntüleri
+
+<table>
+  <tr>
+    <td width="33%" align="center" valign="top">
+      <img src="docs/screenshots/ana-sayfa.png" width="200" alt="Ana Sayfa" /><br />
+      <b>Ana Sayfa</b><br />
+      <sub>Seri, XP, günlük hedef ve "Bugünün planı". Zayıf konulara tek dokunuşla test.</sub>
+    </td>
+    <td width="33%" align="center" valign="top">
+      <img src="docs/screenshots/mufredat.png" width="200" alt="Müfredat" /><br />
+      <b>Müfredat</b><br />
+      <sub>YDS / YÖKDİL kategorileri ve konu bazlı hazır olma yüzdesi.</sub>
+    </td>
+    <td width="33%" align="center" valign="top">
+      <img src="docs/screenshots/kelime-calismasi.png" width="200" alt="Test öncesi kelime çalışması" /><br />
+      <b>Test öncesi kelime çalışması</b><br />
+      <sub>Testteki kelimeler, anlamı ve örnek cümlesi. Bilmediklerini deftere ekle, sonra testi çöz.</sub>
+    </td>
+  </tr>
+  <tr>
+    <td width="33%" align="center" valign="top">
+      <img src="docs/screenshots/soru-aciklama.png" width="200" alt="Soru ve açıklama" /><br />
+      <b>Soru ve açıklama</b><br />
+      <sub>Cevaptan sonra Türkçe açıklama, kelimenin anlamı ve dinleme düğmeli örnek cümle. Soru başı süre sayacı.</sub>
+    </td>
+    <td width="33%" align="center" valign="top">
+      <img src="docs/screenshots/yanlis-defteri.png" width="200" alt="Yanlış defteri" /><br />
+      <b>Yanlış defteri</b><br />
+      <sub>Yanlış yapılan sorular, doğru cevap ve kelime bilgisi. "Test çöz" yanlışları ve ikizlerini sorar.</sub>
+    </td>
+    <td width="33%" align="center" valign="top">
+      <img src="docs/screenshots/setlerim.png" width="200" alt="Setlerim ve kelime defteri" /><br />
+      <b>Setlerim ve kelime defteri</b><br />
+      <sub>Aralıklı tekrar (FSRS) ile çalışılan kelime defterin ve kart setleri.</sub>
+    </td>
+  </tr>
+  <tr>
+    <td width="33%" align="center" valign="top">
+      <img src="docs/screenshots/deneme-sinavi.png" width="200" alt="Deneme sınavı kurulumu" /><br />
+      <b>Deneme sınavı kurulumu</b><br />
+      <sub>Mini (20), yarım (40) ve tam (80 soru) deneme; süre soru sayısına göre ayarlanır.</sub>
+    </td>
+    <td width="33%" align="center" valign="top">
+      <img src="docs/screenshots/deneme-soru.png" width="200" alt="Deneme sınavı" /><br />
+      <b>Deneme sınavı</b><br />
+      <sub>Geri sayım, soru haritası ve cevabı geri alma. Sonuç ve kategori analizi sınav bitince.</sub>
+    </td>
+    <td width="33%"></td>
+  </tr>
+</table>
 
 ## Özellikler
 
