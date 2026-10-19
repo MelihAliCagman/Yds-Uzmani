@@ -4,7 +4,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'ai/gemini_client.dart';
-import 'data/curriculum_data.dart';
 import 'data/seed_data.dart';
 import 'models.dart';
 import 'srs/sm2.dart';
