@@ -7,6 +7,7 @@ import '../features/decks/decks_screen.dart';
 import '../features/flashcards/flashcards_screen.dart';
 import '../features/generator/generator_screen.dart';
 import '../features/home/home_screen.dart';
+import '../features/mock/mock_screen.dart';
 import '../features/profile/profile_screen.dart';
 import '../features/quiz/quiz_screen.dart';
 import '../features/study/study_screen.dart';
@@ -47,8 +48,10 @@ final router = GoRouter(
         topicId: s.uri.queryParameters['topic'],
         categoryId: s.uri.queryParameters['category'],
         wrongOnly: s.uri.queryParameters['wrong'] == '1',
+        weakOnly: s.uri.queryParameters['weak'] == '1',
       ),
     ),
+    GoRoute(path: '/mock', builder: (_, __) => const MockScreen()),
     GoRoute(path: '/wrong', builder: (_, __) => const WrongScreen()),
     GoRoute(path: '/vocab', builder: (_, __) => const VocabScreen()),
     GoRoute(path: '/vocab/review', builder: (_, __) => const VocabReviewScreen()),

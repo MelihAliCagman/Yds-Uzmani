@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../app/theme.dart';
 import '../../core/models.dart';
+import '../../core/tts.dart';
 import '../../core/vocab.dart';
 import '../../core/widgets/widgets.dart';
 
@@ -133,8 +134,15 @@ class _Row extends ConsumerWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(item.word,
-                      style: const TextStyle(fontSize: 17, fontWeight: FontWeight.w800)),
+                  Row(
+                    children: [
+                      Flexible(
+                        child: Text(item.word,
+                            style: const TextStyle(fontSize: 17, fontWeight: FontWeight.w800)),
+                      ),
+                      SpeakerButton(item.word, size: 20),
+                    ],
+                  ),
                   if (item.meaning.isNotEmpty)
                     Text(item.meaning, style: const TextStyle(fontSize: 15)),
                   if (item.example.isNotEmpty)

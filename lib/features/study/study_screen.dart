@@ -49,10 +49,10 @@ class StudyScreen extends ConsumerWidget {
         ),
         _Mode(
           icon: Icons.timer_rounded,
-          color: AppColors.textSoft,
+          color: AppColors.danger,
           title: 'Deneme sınavı',
-          subtitle: 'Yakında · 80 soru, süreli',
-          onTap: null,
+          subtitle: 'Süreli, kategori analizli',
+          onTap: () => context.push('/mock'),
         ),
       ],
     );

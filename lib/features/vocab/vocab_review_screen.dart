@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../app/theme.dart';
 import '../../core/srs/fsrs.dart';
+import '../../core/tts.dart';
 import '../../core/vocab.dart';
 import '../../core/widgets/widgets.dart';
 
@@ -93,10 +94,16 @@ class _VocabReviewScreenState extends ConsumerState<VocabReviewScreen> {
                         ? Column(
                             mainAxisSize: MainAxisSize.min,
                             children: [
-                              Text(e.word,
-                                  textAlign: TextAlign.center,
-                                  style: const TextStyle(
-                                      fontSize: 22, color: AppColors.textSoft)),
+                              Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Text(e.word,
+                                      textAlign: TextAlign.center,
+                                      style: const TextStyle(
+                                          fontSize: 22, color: AppColors.textSoft)),
+                                  SpeakerButton(e.word),
+                                ],
+                              ),
                               const SizedBox(height: 12),
                               Text(e.meaning,
                                   textAlign: TextAlign.center,
@@ -113,10 +120,16 @@ class _VocabReviewScreenState extends ConsumerState<VocabReviewScreen> {
                               ],
                             ],
                           )
-                        : Text(e.word,
-                            textAlign: TextAlign.center,
-                            style: const TextStyle(
-                                fontSize: 38, fontWeight: FontWeight.w900)),
+                        : Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Text(e.word,
+                                  textAlign: TextAlign.center,
+                                  style: const TextStyle(
+                                      fontSize: 38, fontWeight: FontWeight.w900)),
+                              SpeakerButton(e.word, size: 32),
+                            ],
+                          ),
                   ),
                 ),
               ),

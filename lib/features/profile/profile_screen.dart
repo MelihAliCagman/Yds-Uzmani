@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../app/theme.dart';
 import '../../core/ai/gemini_client.dart';
 import '../../core/providers.dart';
+import '../../core/reminders.dart';
 import '../../core/vocab.dart';
 import '../../core/widgets/widgets.dart';
 
@@ -19,6 +20,7 @@ class ProfileScreen extends ConsumerWidget {
     final hasKey = geminiKey.isNotEmpty;
     final exam = ref.watch(examDateProvider);
     final left = daysUntilExam(exam);
+    final reminder = ref.watch(reminderProvider);
 
     return ListView(
       padding: const EdgeInsets.fromLTRB(16, 24, 16, 24),
@@ -56,6 +58,47 @@ class ProfileScreen extends ConsumerWidget {
                 child: Text(exam == null
                     ? 'Sınav tarihini seç: tekrar aralıkları sınava göre ayarlanır.'
                     : 'Sınav: ${exam.day}.${exam.month}.${exam.year} · ${left! < 0 ? 'geçti' : '$left gün kaldı'}'),
+              ),
+            ],
+          ),
+        ),
+        const SizedBox(height: 12),
+        GlassCard(
+          color: AppColors.warning,
+          padding: const EdgeInsets.fromLTRB(16, 8, 8, 8),
+          child: Row(
+            children: [
+              const Icon(Icons.notifications_active_rounded, color: AppColors.warning),
+              const SizedBox(width: 12),
+              Expanded(
+                child: GestureDetector(
+                  onTap: reminder == null
+                      ? null
+                      : () async {
+                          final t = await showTimePicker(context: context, initialTime: reminder);
+                          if (t != null) ref.read(reminderProvider.notifier).set(t);
+                        },
+                  child: Text(reminder == null
+                      ? 'Günlük hatırlatma kapalı'
+                      : 'Her gün ${reminder.hour.toString().padLeft(2, '0')}:${reminder.minute.toString().padLeft(2, '0')} · saati değiştirmek için dokun'),
+                ),
+              ),
+              Switch(
+                value: reminder != null,
+                onChanged: (on) async {
+                  final messenger = ScaffoldMessenger.of(context);
+                  if (!on) {
+                    await ref.read(reminderProvider.notifier).set(null);
+                    return;
+                  }
+                  final ok = await ref
+                      .read(reminderProvider.notifier)
+                      .set(const TimeOfDay(hour: 20, minute: 0));
+                  if (!ok) {
+                    messenger.showSnackBar(const SnackBar(
+                        content: Text('Bildirim izni verilmedi. Telefon ayarlarından açabilirsin.')));
+                  }
+                },
               ),
             ],
           ),

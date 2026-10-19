@@ -61,6 +61,7 @@ class Question {
     this.meaning = '',
     this.example = '',
     this.glossary = const [],
+    this.twinOf = '',
   });
 
   final String id;
@@ -81,6 +82,9 @@ class Question {
   /// Soru metnindeki (şıklar hariç) zor kelimeler.
   final List<Gloss> glossary;
 
+  /// Doluysa: bu soru, id'si verilen sorunun "ikizi"dir (aynı kelime, farklı cümle).
+  final String twinOf;
+
   Map<String, dynamic> toJson() => {
         'id': id,
         'topicId': topicId,
@@ -93,6 +97,7 @@ class Question {
         'word': word,
         'meaning': meaning,
         'example': example,
+        'twinOf': twinOf,
         'glossary': [
           for (final g in glossary) {'word': g.word, 'meaning': g.meaning}
         ],
@@ -112,6 +117,7 @@ class Question {
         word: (j['word'] as String?) ?? '',
         meaning: (j['meaning'] as String?) ?? '',
         example: (j['example'] as String?) ?? '',
+        twinOf: (j['twinOf'] as String?) ?? '',
         glossary: [
           for (final g in (j['glossary'] as List? ?? const []))
             Gloss('${g['word']}', '${g['meaning']}')

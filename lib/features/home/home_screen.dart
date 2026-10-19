@@ -7,6 +7,7 @@ import '../../core/data/curriculum_data.dart';
 import '../../core/providers.dart';
 import '../../core/vocab.dart';
 import '../../core/widgets/widgets.dart';
+import 'daily_plan.dart';
 
 class HomeScreen extends ConsumerWidget {
   const HomeScreen({super.key});
@@ -76,6 +77,8 @@ class HomeScreen extends ConsumerWidget {
           ),
         ),
         const SizedBox(height: 16),
+        const DailyPlan(),
+        const SizedBox(height: 16),
         Row(
           children: [
             Expanded(
@@ -100,8 +103,20 @@ class HomeScreen extends ConsumerWidget {
           ],
         ),
         const SizedBox(height: 24),
-        const Text('Zayıf alanlar',
-            style: TextStyle(fontSize: 20, fontWeight: FontWeight.w800)),
+        Row(
+          children: [
+            const Expanded(
+              child: Text('Zayıf alanlar',
+                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.w800)),
+            ),
+            if (weak.isNotEmpty)
+              TextButton.icon(
+                onPressed: () => context.push('/quiz?weak=1'),
+                icon: const Icon(Icons.play_arrow_rounded, size: 18),
+                label: const Text('Zayıflarımdan test'),
+              ),
+          ],
+        ),
         const SizedBox(height: 12),
         if (weak.isEmpty)
           const GlassCard(

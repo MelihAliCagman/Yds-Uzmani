@@ -1,8 +1,12 @@
 // Toplu soru üretici. Ücretsiz kota dolana kadar konuları sırayla dolaşır,
 // sonuçları assets/seed/questions.json dosyasına kaydeder (her istekten sonra).
 //
-// Çalıştırma:  dart run tool/generate_questions.dart [konu başına en fazla soru]
+// Çalıştırma:  dart run tool/generate_questions.dart [konu başına en fazla soru] [--watch]
+//   --watch    Günlük kota dolunca çıkmaz; 15 dk'da bir dener, kota yenilenir
+//              yenilenmez (Gemini kotası gece yarısı Pasifik saatinde, yani
+//              Türkiye'de yaklaşık 10:00-11:00'de sıfırlanır) üretime devam eder.
 // Durdurma:    Ctrl+C (o ana kadarki sorular dosyada kalır)
+// Aynı anda tek örnek çalışır (tool/.generator.lock).
 import 'dart:convert';
 import 'dart:io';
 import 'dart:math';
@@ -91,7 +95,19 @@ Map<String, dynamic>? validate(dynamic i, T t, int level) {
 }
 
 Future<void> main(List<String> args) async {
-  final cap = args.isNotEmpty ? int.parse(args.first) : 100;
+  final watch = args.contains('--watch');
+  final nums = args.where((a) => int.tryParse(a) != null);
+  final cap = nums.isNotEmpty ? int.parse(nums.first) : 100;
+
+  // Tek örnek: ikinci bir üretici aynı dosyayı ezmesin.
+  final lock = File('tool/.generator.lock').openSync(mode: FileMode.write);
+  try {
+    lock.lockSync(FileLock.exclusive);
+  } on FileSystemException {
+    stderr.writeln('Başka bir üretici zaten çalışıyor (tool/.generator.lock).');
+    exit(1);
+  }
+
   final env = jsonDecode(File('env.json').readAsStringSync()) as Map;
   final key = env['GEMINI_API_KEY'] as String;
   if (key.isEmpty) {
@@ -142,8 +158,13 @@ Future<void> main(List<String> args) async {
         // Dakikalık limit mi, günlük kota mı?
         if (body.contains('PerDay') || body.contains('per day')) {
           stdout.writeln('Günlük kota doldu. Toplam ${all.length} soru kaydedildi.');
-          client.close();
-          return;
+          if (!watch) {
+            client.close();
+            return;
+          }
+          stdout.writeln('${DateTime.now()}: 15 dk sonra yeniden denenecek (kota yenilenince devam).');
+          await Future<void>.delayed(const Duration(minutes: 15));
+          continue;
         }
         stdout.writeln('Dakikalık limit, 65 sn bekleniyor…');
         await Future<void>.delayed(const Duration(seconds: 65));
@@ -153,9 +174,14 @@ Future<void> main(List<String> args) async {
         failStreak++;
         stdout.writeln('HTTP ${res.statusCode} (${t.id}), tekrar denenecek.');
         if (failStreak >= 8) {
-          stdout.writeln('Üst üste çok hata, duruyorum. Toplam ${all.length} soru.');
-          client.close();
-          return;
+          if (!watch) {
+            stdout.writeln('Üst üste çok hata, duruyorum. Toplam ${all.length} soru.');
+            client.close();
+            return;
+          }
+          failStreak = 0;
+          await Future<void>.delayed(const Duration(minutes: 15));
+          continue;
         }
         await Future<void>.delayed(Duration(seconds: 10 * failStreak));
         continue;
@@ -176,7 +202,9 @@ Future<void> main(List<String> args) async {
       } catch (e) {
         stdout.writeln('Çözümleme hatası (${t.id}): $e');
       }
-      out.writeAsStringSync(jsonEncode(all));
+      // Yarım dosya kalmasın: önce geçici dosyaya yaz, sonra yer değiştir.
+      final tmp = File('${out.path}.tmp')..writeAsStringSync(jsonEncode(all));
+      tmp.renameSync(out.path);
       stdout.writeln('[tur $round] ${t.id}: +$added (toplam ${all.length})');
       await Future<void>.delayed(pauseBetween);
     }

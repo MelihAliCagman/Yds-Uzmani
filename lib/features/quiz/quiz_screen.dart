@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
@@ -14,10 +15,17 @@ import '../wrong/word_info.dart';
 import 'word_prep.dart';
 
 class QuizScreen extends ConsumerStatefulWidget {
-  const QuizScreen({super.key, this.topicId, this.categoryId, this.wrongOnly = false});
+  const QuizScreen({
+    super.key,
+    this.topicId,
+    this.categoryId,
+    this.wrongOnly = false,
+    this.weakOnly = false,
+  });
   final String? topicId;
   final String? categoryId;
   final bool wrongOnly;
+  final bool weakOnly;
 
   @override
   ConsumerState<QuizScreen> createState() => _QuizScreenState();
@@ -32,10 +40,22 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
   /// Test başlamadan önce kelime çalışma ekranı gösteriliyor mu?
   bool studying = false;
 
+  /// Her soru için süre tutulur (özellikle okuma/paragraf sorularında zaman önemli).
+  final Stopwatch watch = Stopwatch();
+  Timer? ticker;
+  int totalMs = 0;
+
   static const quizSize = 10;
+
+  /// Hedef süre (sn): okuma/cloze/çeviri sorularında daha uzun.
+  int _targetSeconds(Question q) {
+    final c = categoryOfTopic(q.topicId).id;
+    return (c == 'reading' || c == 'cloze' || c == 'translation') ? 150 : 60;
+  }
 
   String get _sessionKey {
     if (widget.wrongOnly) return 'session_wrong';
+    if (widget.weakOnly) return 'session_weak';
     if (widget.topicId != null) return 'session_topic_${widget.topicId}';
     if (widget.categoryId != null) return 'session_cat_${widget.categoryId}';
     return 'session_mix';
@@ -50,6 +70,16 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
       studying = questions.any((q) => q.word.isNotEmpty || q.glossary.isNotEmpty);
     }
     _save();
+    ticker = Timer.periodic(const Duration(seconds: 1), (_) {
+      if (mounted && !studying && selected == null) setState(() {});
+    });
+    if (!studying) watch.start();
+  }
+
+  @override
+  void dispose() {
+    ticker?.cancel();
+    super.dispose();
   }
 
   /// Yarım kalan test varsa kaldığı yerden devam eder.
@@ -89,21 +119,48 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
   }
 
   List<Question> _pick(List<Question> all) {
+    // İkiz (yedek) sorular normal testlerde çıkmaz; yanlış testinde çıkar.
+    final base = all.where((q) => q.twinOf.isEmpty).toList();
+
     if (widget.wrongOnly) {
-      // Önce yanlış yapılanlar, kalan yer aynı konulardan benzer sorularla dolar.
+      // Yanlış yapılanlar + ikizleri (aynı kelime, farklı cümle), kalanı benzer sorularla dolar.
       final wrongIds = ref.read(progressProvider).wrongIds;
       final wrong = all.where((q) => wrongIds.contains(q.id)).toList()..shuffle();
       if (wrong.isEmpty) return [];
-      final topics = wrong.map((q) => q.topicId).toSet();
-      final similar = all
-          .where((q) => !wrongIds.contains(q.id) && topics.contains(q.topicId))
-          .toList()
-        ..shuffle();
-      final head = wrong.take(quizSize ~/ 2 + (quizSize % 2)).toList();
-      final rest = [...wrong.skip(head.length), ...similar];
-      return [...head, ...rest.take(quizSize - head.length)]..shuffle();
+      final chosen = <Question>[];
+      for (final w in wrong) {
+        if (chosen.length >= quizSize) break;
+        chosen.add(w);
+        final twin = all.where((q) => q.twinOf == w.id && !chosen.contains(q)).firstOrNull;
+        if (twin != null && chosen.length < quizSize) chosen.add(twin);
+      }
+      if (chosen.length < quizSize) {
+        final topics = wrong.map((q) => q.topicId).toSet();
+        final similar = base
+            .where((q) => !wrongIds.contains(q.id) && topics.contains(q.topicId))
+            .toList()
+          ..shuffle();
+        chosen.addAll(similar.take(quizSize - chosen.length));
+      }
+      return chosen..shuffle();
     }
-    final list = all.where((q) {
+
+    if (widget.weakOnly) {
+      // En düşük başarılı 3 konu (en az 3 soru çözülmüş), yoksa karışık.
+      final stats = ref
+          .read(progressProvider)
+          .topics
+          .entries
+          .where((e) => e.value.total >= 3)
+          .toList()
+        ..sort((a, b) => a.value.rate.compareTo(b.value.rate));
+      final weak = stats.take(3).map((e) => e.key).toSet();
+      final pool =
+          (weak.isEmpty ? base : base.where((q) => weak.contains(q.topicId)).toList())..shuffle();
+      return pool.take(quizSize).toList();
+    }
+
+    final list = base.where((q) {
       if (widget.topicId != null) return q.topicId == widget.topicId;
       if (widget.categoryId != null) {
         return categoryOf(widget.categoryId!).topics.any((t) => t.id == q.topicId);
@@ -116,6 +173,7 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
 
   String get title {
     if (widget.wrongOnly) return 'Yanlış defteri testi';
+    if (widget.weakOnly) return 'Zayıf konularım';
     if (widget.topicId != null) return topicById(widget.topicId!).name;
     if (widget.categoryId != null) return categoryOf(widget.categoryId!).name;
     return 'Karışık sorular';
@@ -125,11 +183,14 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
     if (selected != null) return;
     final q = questions[index];
     final ok = i == q.correctIndex;
+    watch.stop();
+    final ms = watch.elapsedMilliseconds;
+    totalMs += ms;
     setState(() {
       selected = i;
       if (ok) score++;
     });
-    ref.read(progressProvider.notifier).recordAnswer(q, ok);
+    ref.read(progressProvider.notifier).recordAnswer(q, ok, ms: ms);
     ref.read(vocabProvider.notifier).recordQuiz(q, ok);
     _save();
   }
@@ -139,6 +200,9 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
       index++;
       selected = null;
     });
+    watch
+      ..reset()
+      ..start();
     _save();
   }
 
@@ -152,10 +216,19 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
             : studying
                 ? WordPrep(
                     questions: questions,
-                    onStart: () => setState(() => studying = false),
+                    onStart: () {
+                      watch
+                        ..reset()
+                        ..start();
+                      setState(() => studying = false);
+                    },
                   )
                 : index >= questions.length
-                    ? _Result(score: score, total: questions.length)
+                    ? _Result(
+                        score: score,
+                        total: questions.length,
+                        avgSeconds: totalMs / 1000 / questions.length,
+                      )
                     : _body(),
       ),
     );
@@ -184,6 +257,11 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
               const SizedBox(width: 12),
               Text('${index + 1}/${questions.length}',
                   style: const TextStyle(fontWeight: FontWeight.w700)),
+              const SizedBox(width: 12),
+              _Clock(
+                seconds: watch.elapsed.inSeconds,
+                over: watch.elapsed.inSeconds > _targetSeconds(q),
+              ),
             ],
           ),
         ),
@@ -352,10 +430,31 @@ class _Empty extends StatelessWidget {
   }
 }
 
+class _Clock extends StatelessWidget {
+  const _Clock({required this.seconds, required this.over});
+  final int seconds;
+  final bool over;
+
+  @override
+  Widget build(BuildContext context) {
+    final t = '${seconds ~/ 60}:${(seconds % 60).toString().padLeft(2, '0')}';
+    final color = over ? AppColors.warning : AppColors.textSoft;
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Icon(Icons.timer_outlined, size: 16, color: color),
+        const SizedBox(width: 3),
+        Text(t, style: TextStyle(fontWeight: FontWeight.w700, color: color)),
+      ],
+    );
+  }
+}
+
 class _Result extends StatelessWidget {
-  const _Result({required this.score, required this.total});
+  const _Result({required this.score, required this.total, required this.avgSeconds});
   final int score;
   final int total;
+  final double avgSeconds;
 
   @override
   Widget build(BuildContext context) {
@@ -370,6 +469,9 @@ class _Result extends StatelessWidget {
                 style: const TextStyle(fontSize: 72, fontWeight: FontWeight.w900)),
             Text('$score / $total doğru',
                 style: const TextStyle(fontSize: 18, color: AppColors.textSoft)),
+            const SizedBox(height: 6),
+            Text('Soru başı ortalama ${avgSeconds.round()} sn',
+                style: const TextStyle(color: AppColors.textSoft)),
             const SizedBox(height: 28),
             FilledButton(onPressed: () => context.pop(), child: const Text('Tamam')),
           ],

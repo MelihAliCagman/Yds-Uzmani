@@ -13,6 +13,8 @@ Amaç basit: **kelimeyi bir kez gör, yanlış yaptığın şeyi tam unutmak üz
 <p align="center">
   <img src="docs/screenshots/yanlis-defteri.png" width="23%" alt="Yanlış defteri" />
   <img src="docs/screenshots/setlerim.png" width="23%" alt="Setlerim ve kelime defteri" />
+  <img src="docs/screenshots/deneme-sinavi.png" width="23%" alt="Deneme sınavı kurulumu" />
+  <img src="docs/screenshots/deneme-soru.png" width="23%" alt="Deneme sınavı" />
 </p>
 
 ## Özellikler
@@ -20,6 +22,13 @@ Amaç basit: **kelimeyi bir kez gör, yanlış yaptığın şeyi tam unutmak üz
 - **Test öncesi kelime çalışması:** Her 10 soruluk testten önce, o testteki kelimeler (anlam + örnek cümle) ve soru metnindeki diğer zor kelimeler listelenir. Bilmediklerini deftere eklersin, sonra testi çözersin.
 - **Kelime defteri + FSRS tekrar:** Kelimeler aralıklı tekrarla çalışılır. Yanlış yaptığın kelime aynı gün tekrar sorulur, ertesi güne planlanır; tekrar yanlış yaparsan yeniden kısa aralığa düşer. Her butonun altında bir sonraki tekrar zamanı görünür.
 - **Yanlış defteri:** Yanlış yapılan soruların doğru cevabı, kelimenin anlamı ve örnek cümlesi. "Test çöz" yanlışlarını ve aynı konulardan benzer soruları karıştırır. "Benzer üret" Gemini ile yanlış yaptığın kelimelere benzer yeni sorular yazar.
+- **Deneme sınavı:** Mini (20), yarım (40) ve tam (80 soru) deneme; soru başı YDS ortalamasına (≈2,25 dk) göre geri sayım, soru haritası, cevabı geri alma. Sonunda doğru/yanlış/boş, kategori analizi ve yanlışların açıklaması. Yanlışlar kelime ve yanlış defterine otomatik girer.
+- **Günlük plan:** Ana sayfada "Bugünün planı": kelime tekrarı, günlük soru hedefi, en zayıf konudan 5 soru ve sınava 60 günden az kaldıysa haftalık deneme.
+- **Zayıf konularımdan test:** En düşük başarılı 3 konudan tek dokunuşla 10 soruluk test.
+- **Soru süresi:** Her soruda süre tutulur; okuma, cloze ve çeviri sorularında hedef süre daha uzundur, aşınca sayaç uyarı rengine döner. Konu başına ortalama süre kaydedilir.
+- **Telaffuz:** Kelimeleri ve örnek cümleleri cihazın İngilizce ses motoruyla dinle (internet gerekmez).
+- **Günlük hatırlatma:** Profil'den saat seç, her gün "kelime tekrarın var" bildirimi gelsin.
+- **İkiz (yedek) sorular:** Her soru için aynı kelimeyi farklı cümlede test eden bir yedek soru. Yanlış defteri testi, yanlış yaptığın sorunun yanında ikizini de sorar; böylece cevabı ezberlemek yerine kelimeyi öğrenirsin.
 - **Sınav tarihine göre planlama:** Sınav tarihini girersin, tekrar aralıkları sınavı aşmayacak şekilde kısalır.
 - **YDS ve YÖKDİL müfredatı:** Kelime, gramer, cloze, okuma, çeviri, diyalog ve YÖKDİL alan kategorileri (fen, sağlık, sosyal), konu bazlı ilerleme.
 - **Yarım kalan test kaldığı yerden devam eder.** İlerleme, XP, seri ve defter cihazda saklanır.
@@ -63,9 +72,17 @@ Soru bankasını büyütmek için iki script var (kendi anahtarınla çalışır
 # Tüm konulara sırayla soru üretir, her istekten sonra assets/seed/questions.json'a kaydeder
 dart run tool/generate_questions.dart 100      # konu başına en fazla 100 soru
 
+# --watch: günlük kota dolunca çıkmaz, 15 dk'da bir dener; kota yenilenince kendiliğinden devam eder
+dart run tool/generate_questions.dart 100 --watch
+
+# Her soru için "ikiz" (aynı kelime, farklı cümle) yedek soru üretir -> assets/seed/twins.json
+dart run tool/generate_twins.dart --watch
+
 # Kelime listesi (glossary) eksik sorulara zor kelimeleri ekler
 dart run tool/enrich_glossary.dart
 ```
+
+Üreticiler aynı anda tek örnek çalışır (kilit dosyası), yarım dosya bırakmaz (geçici dosya + yer değiştirme) ve Ctrl+C ile güvenle durdurulabilir. Yeni üretilen sorular uygulamaya bir sonraki derlemede girer.
 
 Üretilen her soru doğrulanır: tam 5 farklı şık, geçerli doğru cevap, dolu açıklama, tekrar eden soru yok. Yine de **sorular yapay zekâ ile üretilmiştir ve hata içerebilir**; şüphelendiğin sorularda resmi kaynaklara ve ÖSYM kılavuzuna bak. Hatalı bir soru bulursan issue açman çok yardımcı olur.
 
@@ -101,10 +118,12 @@ Teknoloji: Flutter, Riverpod, go_router, dio, shared_preferences. Veriler şimdi
 
 ## Yol haritası
 
-- [ ] Deneme sınavı modu (80 soru, süreli, konu bazlı analiz)
-- [ ] Günlük çalışma planı (sınav tarihine göre)
-- [ ] Kelime telaffuzu (TTS) ve günlük hatırlatma bildirimi
-- [ ] Her soru için yedek (benzer) soru bankası
+- [x] Deneme sınavı modu (süreli, kategori analizli)
+- [x] Günlük çalışma planı ve zayıf konu testi
+- [x] Kelime telaffuzu (TTS) ve günlük hatırlatma bildirimi
+- [x] Her soru için yedek (ikiz) soru
+- [ ] Deneme geçmişi grafikleri (fl_chart) ve konu bazlı gelişim
+- [ ] Okuma pratiği: uzun paragraf soruları ve süreli okuma modu
 - [ ] Drift/SQLite'a geçiş, web sürümü ve bulut senkronizasyonu
 
 Katkılar memnuniyetle karşılanır: hatalı soru bildirimi, yeni soru/kelime, çeviri düzeltmesi, kod. Bir issue ya da pull request açman yeterli.

@@ -57,3 +57,8 @@ GoogleService-Info.plist
 .github/modernize/
 .idea/
 *.iml
+
+tool/.generator.lock
+assets/seed/questions.json.tmp
+tool/.twins.lock
+assets/seed/twins.json.tmp

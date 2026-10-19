@@ -51,10 +51,14 @@ final questionsProvider =
 // ---------------------------------------------------------------- İlerleme
 
 class TopicStat {
-  const TopicStat(this.correct, this.total);
+  const TopicStat(this.correct, this.total, [this.ms = 0]);
   final int correct;
   final int total;
+
+  /// Bu konuda cevaplamaya harcanan toplam süre (ms).
+  final int ms;
   double get rate => total == 0 ? 0 : correct / total;
+  double get avgSeconds => total == 0 ? 0 : ms / total / 1000;
 }
 
 class Progress {
@@ -65,6 +69,7 @@ class Progress {
     this.lastDay = '',
     this.todayAnswered = 0,
     this.todayDay = '',
+    this.todayTopics = const {},
     this.wrongIds = const {},
   });
 
@@ -74,29 +79,58 @@ class Progress {
   final String lastDay;
   final int todayAnswered;
   final String todayDay;
+
+  /// Bugün konu başına çözülen soru sayısı (günlük plan için).
+  final Map<String, int> todayTopics;
   final Set<String> wrongIds;
 
   int get answeredToday => todayDay == _today() ? todayAnswered : 0;
+  Map<String, int> get topicsToday => todayDay == _today() ? todayTopics : const {};
+
+  Progress copyWith({
+    Map<String, TopicStat>? topics,
+    int? xp,
+    int? streak,
+    String? lastDay,
+    int? todayAnswered,
+    String? todayDay,
+    Map<String, int>? todayTopics,
+    Set<String>? wrongIds,
+  }) =>
+      Progress(
+        topics: topics ?? this.topics,
+        xp: xp ?? this.xp,
+        streak: streak ?? this.streak,
+        lastDay: lastDay ?? this.lastDay,
+        todayAnswered: todayAnswered ?? this.todayAnswered,
+        todayDay: todayDay ?? this.todayDay,
+        todayTopics: todayTopics ?? this.todayTopics,
+        wrongIds: wrongIds ?? this.wrongIds,
+      );
 
   Map<String, dynamic> toJson() => {
-        'topics': topics.map((k, v) => MapEntry(k, [v.correct, v.total])),
+        'topics': topics.map((k, v) => MapEntry(k, [v.correct, v.total, v.ms])),
         'xp': xp,
         'streak': streak,
         'lastDay': lastDay,
         'todayAnswered': todayAnswered,
         'todayDay': todayDay,
+        'todayTopics': todayTopics,
         'wrongIds': wrongIds.toList(),
       };
 
   factory Progress.fromJson(Map<String, dynamic> j) => Progress(
-        topics: (j['topics'] as Map<String, dynamic>).map(
-          (k, v) => MapEntry(k, TopicStat((v as List)[0] as int, v[1] as int)),
-        ),
+        topics: (j['topics'] as Map<String, dynamic>).map((k, v) {
+          final l = v as List;
+          return MapEntry(k, TopicStat(l[0] as int, l[1] as int, l.length > 2 ? l[2] as int : 0));
+        }),
         xp: j['xp'] as int,
         streak: j['streak'] as int,
         lastDay: j['lastDay'] as String,
         todayAnswered: j['todayAnswered'] as int,
         todayDay: j['todayDay'] as String,
+        todayTopics: (j['todayTopics'] as Map<String, dynamic>? ?? const {})
+            .map((k, v) => MapEntry(k, v as int)),
         wrongIds: Set<String>.from(j['wrongIds'] as List),
       );
 }
@@ -111,7 +145,8 @@ class ProgressNotifier extends Notifier<Progress> {
     return raw == null ? const Progress() : Progress.fromJson(jsonDecode(raw));
   }
 
-  void recordAnswer(Question q, bool correct) {
+  /// [ms]: soruya harcanan süre (0 ise süre kaydedilmez).
+  void recordAnswer(Question q, bool correct, {int ms = 0}) {
     final today = _today();
     final yesterday =
         DateTime.now().subtract(const Duration(days: 1)).toIso8601String().substring(0, 10);
@@ -124,18 +159,22 @@ class ProgressNotifier extends Notifier<Progress> {
     final old = state.topics[q.topicId] ?? const TopicStat(0, 0);
     final topics = {
       ...state.topics,
-      q.topicId: TopicStat(old.correct + (correct ? 1 : 0), old.total + 1),
+      q.topicId: TopicStat(old.correct + (correct ? 1 : 0), old.total + 1, old.ms + ms),
     };
     final wrong = {...state.wrongIds};
     correct ? wrong.remove(q.id) : wrong.add(q.id);
 
-    state = Progress(
+    final todayTopics = {...state.topicsToday};
+    todayTopics[q.topicId] = (todayTopics[q.topicId] ?? 0) + 1;
+
+    state = state.copyWith(
       topics: topics,
       xp: state.xp + (correct ? 10 : 2),
       streak: streak,
       lastDay: today,
       todayAnswered: state.answeredToday + 1,
       todayDay: today,
+      todayTopics: todayTopics,
       wrongIds: wrong,
     );
     _save();
@@ -143,14 +182,10 @@ class ProgressNotifier extends Notifier<Progress> {
 
   void addXp(int amount) {
     final today = _today();
-    state = Progress(
-      topics: state.topics,
+    state = state.copyWith(
       xp: state.xp + amount,
       streak: state.lastDay == today ? state.streak : (state.streak == 0 ? 1 : state.streak),
       lastDay: state.lastDay.isEmpty ? today : state.lastDay,
-      todayAnswered: state.answeredToday,
-      todayDay: state.todayDay,
-      wrongIds: state.wrongIds,
     );
     _save();
   }
