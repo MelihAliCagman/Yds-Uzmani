@@ -1,0 +1,7 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    { "name": "YDS App (debug)", "request": "launch", "type": "dart", "args": ["--dart-define-from-file=env.json"] },
+    { "name": "YDS App (release)", "request": "launch", "type": "dart", "flutterMode": "release", "args": ["--dart-define-from-file=env.json"] }
+  ]
+}
