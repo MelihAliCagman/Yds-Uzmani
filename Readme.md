@@ -52,7 +52,11 @@ Amaç basit: **kelimeyi bir kez gör, yanlış yaptığın şeyi tam unutmak üz
       <b>Deneme sınavı</b><br />
       <sub>Geri sayım, soru haritası ve cevabı geri alma. Sonuç ve kategori analizi sınav bitince.</sub>
     </td>
-    <td width="33%"></td>
+    <td width="33%" align="center" valign="top">
+      <img src="docs/screenshots/profil.png" width="200" alt="Profil" /><br />
+      <b>Profil</b><br />
+      <sub>İstatistikler, sınav tarihi seçimi (tekrar aralıkları ona göre ayarlanır) ve günlük hatırlatma.</sub>
+    </td>
   </tr>
 </table>
 
