@@ -62,3 +62,5 @@ tool/.generator.lock
 assets/seed/questions.json.tmp
 tool/.twins.lock
 assets/seed/twins.json.tmp
+tool/.cefr.lock
+assets/seed/cefr.json.tmp
