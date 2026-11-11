@@ -147,6 +147,18 @@ class VocabNotifier extends Notifier<Map<String, VocabEntry>> {
     review(id, correct ? Grade.good : Grade.again);
   }
 
+  /// Kelime testinde bir kelime: [recordQuiz] ile aynı mantık, soru nesnesi olmadan.
+  void recordWord(String word, String meaning, bool correct,
+      {String example = '', String topicId = ''}) {
+    final id = vocabId(word);
+    if (id.isEmpty) return;
+    if (!state.containsKey(id)) {
+      if (correct) return;
+      add(word, meaning, example: example, topicId: topicId);
+    }
+    review(id, correct ? Grade.good : Grade.again);
+  }
+
   List<VocabEntry> dueEntries({DateTime? now}) {
     final t = now ?? DateTime.now();
     final due = state.values
