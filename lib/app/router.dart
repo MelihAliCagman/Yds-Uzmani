@@ -8,6 +8,10 @@ import '../features/flashcards/flashcards_screen.dart';
 import '../features/generator/generator_screen.dart';
 import '../features/home/home_screen.dart';
 import '../features/mock/mock_screen.dart';
+import '../features/own/own_exam_screen.dart';
+import '../features/own/own_hub_screen.dart';
+import '../features/own/own_word_quiz_screen.dart';
+import '../features/own/own_words_screen.dart';
 import '../features/profile/profile_screen.dart';
 import '../features/quiz/quiz_screen.dart';
 import '../features/study/study_screen.dart';
@@ -52,6 +56,14 @@ final router = GoRouter(
       ),
     ),
     GoRoute(path: '/mock', builder: (_, __) => const MockScreen()),
+    GoRoute(path: '/own', builder: (_, __) => const OwnHubScreen()),
+    GoRoute(path: '/own/words', builder: (_, __) => const OwnWordsScreen()),
+    GoRoute(path: '/own/words/quiz', builder: (_, __) => const OwnWordQuizScreen()),
+    GoRoute(path: '/own/exams', builder: (_, __) => const OwnExamListScreen()),
+    GoRoute(
+      path: '/own/exam/:id',
+      builder: (_, s) => OwnExamScreen(examId: int.parse(s.pathParameters['id']!)),
+    ),
     GoRoute(path: '/wrong', builder: (_, __) => const WrongScreen()),
     GoRoute(path: '/vocab', builder: (_, __) => const VocabScreen()),
     GoRoute(path: '/vocab/review', builder: (_, __) => const VocabReviewScreen()),

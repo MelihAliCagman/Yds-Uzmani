@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../app/theme.dart';
 import '../../core/ai/gemini_client.dart';
@@ -37,6 +38,21 @@ class ProfileScreen extends ConsumerWidget {
           ],
         ),
         const SizedBox(height: 16),
+        GlassCard(
+          color: const Color(0xFF3B9BEA),
+          onTap: () => context.push('/own'),
+          child: const Row(
+            children: [
+              Icon(Icons.folder_special_rounded, color: Color(0xFF3B9BEA)),
+              SizedBox(width: 12),
+              Expanded(
+                child: Text('Kendi sınavlarım: kendi setinin kelimeleri, kelime testi ve denemeler.'),
+              ),
+              Icon(Icons.chevron_right_rounded),
+            ],
+          ),
+        ),
+        const SizedBox(height: 12),
         GlassCard(
           color: AppColors.accent,
           onTap: () async {
