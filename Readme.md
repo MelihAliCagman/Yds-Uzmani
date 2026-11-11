@@ -1,3 +1,5 @@
+<p align="center"><img src="docs/logo/yds-uzmani-logo.png" width="120" alt="YDS Uzmanı logosu" /></p>
+
 # YDS Uzmanı
 
 **YDS / YÖKDİL** sınavlarına hazırlanmak için geliştirilmiş, açık kaynak, Flutter tabanlı bir çalışma uygulaması. Sorular, kelime listesi ve kodun tamamı serbestçe kullanılabilir.
@@ -60,6 +62,45 @@ Amaç basit: **kelimeyi bir kez gör, yanlış yaptığın şeyi tam unutmak üz
   </tr>
 </table>
 
+### Kendi sınavlarım
+
+Profil ekranından açılır. Kendi hazırlık setindeki (kelime listesi ve deneme sınavları) içerik uygulamaya ayrı bir bölüm olarak eklenir.
+
+<table>
+  <tr>
+    <td width="25%" align="center" valign="top">
+      <img src="docs/screenshots/kendi-sinavlarim.png" width="160" alt="Kendi sınavlarım" /><br />
+      <b>Kendi sınavlarım</b><br />
+      <sub>Konu anlatımı, kelime testi ve deneme sınavları.</sub>
+    </td>
+    <td width="25%" align="center" valign="top">
+      <img src="docs/screenshots/kendi-kelimeler.png" width="160" alt="Konu anlatımı" /><br />
+      <b>Konu anlatımı · Kelimeler</b><br />
+      <sub>Haftalara göre kelime, Türkçesi ve örnek cümle. Karışan ve ek kelimeler, arama, dinleme, deftere ekleme.</sub>
+    </td>
+    <td width="25%" align="center" valign="top">
+      <img src="docs/screenshots/kendi-kelime-testi.png" width="160" alt="Kelime testi" /><br />
+      <b>Kelime testi</b><br />
+      <sub>"inspect nedir?" gibi 4 şıklı anlam soruları. Yanlışlar kelime defterine girer.</sub>
+    </td>
+    <td width="25%" align="center" valign="top">
+      <img src="docs/screenshots/kendi-denemeler.png" width="160" alt="Deneme sınavları" /><br />
+      <b>Deneme sınavları</b><br />
+      <sub>Her biri 42 soruluk 10 deneme.</sub>
+    </td>
+  </tr>
+  <tr>
+    <td width="25%" align="center" valign="top">
+      <img src="docs/screenshots/kendi-deneme-soru.png" width="160" alt="Okuma sorusu" /><br />
+      <b>Okuma sorusu</b><br />
+      <sub>50 dk geri sayım, soru haritası; okuma metni sorunun üstünde durur.</sub>
+    </td>
+    <td width="25%"></td>
+    <td width="25%"></td>
+    <td width="25%"></td>
+  </tr>
+</table>
+
 ## Özellikler
 
 - **Test öncesi kelime çalışması:** Her 10 soruluk testten önce, o testteki kelimeler (anlam + örnek cümle) ve soru metnindeki diğer zor kelimeler listelenir. Bilmediklerini deftere eklersin, sonra testi çözersin.
@@ -75,6 +116,7 @@ Amaç basit: **kelimeyi bir kez gör, yanlış yaptığın şeyi tam unutmak üz
 - **Sınav tarihine göre planlama:** Sınav tarihini girersin, tekrar aralıkları sınavı aşmayacak şekilde kısalır.
 - **YDS ve YÖKDİL müfredatı:** Kelime, gramer, cloze, okuma, çeviri, diyalog ve YÖKDİL alan kategorileri (fen, sağlık, sosyal), konu bazlı ilerleme.
 - **Yarım kalan test kaldığı yerden devam eder.** İlerleme, XP, seri ve defter cihazda saklanır.
+- **Kendi sınavlarım:** Profil'den açılan bölümde kendi kelime listen ve deneme sınavların durur: haftalara göre konu anlatımı (kelime, Türkçesi, örnek cümle), 4 şıklı kelime testi ve 10 süreli deneme sınavı (Vocabulary, Situations, Reading). Verisi [assets/own/midterm.json](assets/own/midterm.json) dosyasındadır.
 - **Gemini ile soru üretimi:** Konu, seviye ve adet seç, uygulama içinden soru üret (kendi API anahtarınla, ücretsiz katmanla çalışır).
 - **Hazır soru bankası:** [assets/seed/questions.json](assets/seed/questions.json) içinde yüzlerce hazır soru, her birinde test edilen kelime, Türkçe anlamı, örnek cümle ve soru metnindeki zor kelimeler var.
 
